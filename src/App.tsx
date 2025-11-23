@@ -3127,7 +3127,9 @@ function App() {
   return (
     <>
       <div className="h-screen bg-gray-900 flex flex-col overflow-hidden">
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+
+        {/* for now this is commented just to make a back button. so instead of this code the below code is replaced just for some testing */}
+        {/* <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-pink-100 rounded flex items-center justify-center">
               <svg
@@ -3147,6 +3149,48 @@ function App() {
               Publish
             </button>
             <button className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium">
+              Close
+            </button>
+          </div>
+        </div> */}
+
+        {/* this is the new code  */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* ADD BACK BUTTON - Only show in editor */}
+            {currentPage === "editor" && (
+              <button
+                onClick={() => window.location.reload()}
+                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Start Over"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
+            )}
+
+            <div className="w-8 h-8 bg-pink-100 rounded flex items-center justify-center">
+              <svg
+                className="w-5 h-5 text-pink-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+              </svg>
+            </div>
+            <span className="text-gray-800 font-medium">
+              Untitled Pricing Table
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors">
+              Publish
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+            >
               Close
             </button>
           </div>
