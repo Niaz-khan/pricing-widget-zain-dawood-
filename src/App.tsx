@@ -18,6 +18,7 @@ interface AppearanceSettings {
   fontWeight: "400" | "700";
   fontSize: number;
   buttonShape: "rounded" | "pill" | "sharp";
+  buttonRadius: number; // ADD THIS LINE
   buttonType: "filled" | "outline" | "gradient";
   columnStyle: "default" | "style1" | "style2" | "style3" | "custom";
 }
@@ -31,7 +32,7 @@ interface BaseCardData {
 interface PricingCardData extends BaseCardData {
   type: "pricing-grid" | "pricing-columns";
   multiTableMode?: boolean;  // ADD THIS
-  tables?: Array<{           // ADD THIS
+  tables?: Array<{
     id: string;
     name: string;
     caption?: string;
@@ -54,6 +55,9 @@ interface PricingCardData extends BaseCardData {
       oldPriceEnabled?: boolean;
       oldPrice?: string;
       discountLabel?: string;
+      priceColor?: string;           // ADD THIS
+      discountLabelColor?: string;   // ADD THIS
+      discountLabelTextColor?: string;   // NEW - For text color
     }>;
   }>;
   widgetTitle?: string;
@@ -62,8 +66,8 @@ interface PricingCardData extends BaseCardData {
   cards: {
     title: string;
     titleCaption?: string;
-    price: string;                    // Free text: user types "$99" or "99 USD" or anything
-    period: string;                   // Free text: user types "/night" or "/month" or anything
+    price: string;
+    period: string;
     priceCaption?: string;
     description: string;
     features: Array<{
@@ -75,24 +79,26 @@ interface PricingCardData extends BaseCardData {
     buttonLink?: string;
     buttonLinkTarget?: "_self" | "_blank";
     imageUrl?: string;
-    oldPriceEnabled?: boolean;        // ADD
-    oldPrice?: string;                // ADD - Free text
-    discountLabel?: string;           // ADD
+    oldPriceEnabled?: boolean;
+     oldPrice?: string;
+    discountLabel?: string;
+    priceColor?: string;           // ADD THIS
+    discountLabelColor?: string;   // ADD THIS
+    discountLabelTextColor?: string;   // NEW - For text color
   }[];
+
+  // interface ComparisonTableData {
+  //   type: "comparison-table";
+  //   title: string;
+  //   plans: {
+  //     name: string;
+  //     price: string;
+  //     period: string;
+  //     features: Record<string, boolean>;
+  //   }[];
+  //   featuresList: string[];
+  // }
 }
-
-// interface ComparisonTableData {
-//   type: "comparison-table";
-//   title: string;
-//   plans: {
-//     name: string;
-//     price: string;
-//     period: string;
-//     features: Record<string, boolean>;
-//   }[];
-//   featuresList: string[];
-// }
-
 interface ComparisonTableData {
   type: "comparison-table";
   title: string;
@@ -191,6 +197,8 @@ const INITIAL_PRICING_CARD: PricingCardData = {
   widgetTitle: "",
   widgetTitleCaption: "",
   showWidgetTitle: false,
+  widgetTitleColor: "#FF6B6B",        // ADD THIS - Default coral/salmon color
+  widgetCaptionColor: "#6B7280",      // ADD THIS - Default gray
   cards: [  // ADD ALL 3 CARDS HERE TOO for single-table mode
     {
       title: "Standard Room",
@@ -1643,6 +1651,7 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
     <div className="space-y-6">
 
       {/* WIDGET TITLE SECTION */}
+      {/* WIDGET TITLE SECTION */}
       {editingCardIndex === null && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -1669,12 +1678,55 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
                 placeholder="Enter widget title"
                 onChange={(value) => onChange({ ...data, widgetTitle: value })}
               />
+
+              {/* ADD THIS - Title Color Picker */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Title Color
+                </label>
+                <div className="flex gap-3 items-center">
+                  <input
+                    type="color"
+                    value={data.widgetTitleColor || "#FF6B6B"}
+                    onChange={(e) => onChange({ ...data, widgetTitleColor: e.target.value })}
+                    className="w-16 h-12 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={data.widgetTitleColor || "#FF6B6B"}
+                    onChange={(e) => onChange({ ...data, widgetTitleColor: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
               <InputField
                 label="Caption"
                 value={data.widgetTitleCaption || ""}
                 placeholder="Enter caption"
                 onChange={(value) => onChange({ ...data, widgetTitleCaption: value })}
               />
+
+              {/* ADD THIS - Caption Color Picker */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Caption Color
+                </label>
+                <div className="flex gap-3 items-center">
+                  <input
+                    type="color"
+                    value={data.widgetCaptionColor || "#6B7280"}
+                    onChange={(e) => onChange({ ...data, widgetCaptionColor: e.target.value })}
+                    className="w-16 h-12 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={data.widgetCaptionColor || "#6B7280"}
+                    onChange={(e) => onChange({ ...data, widgetCaptionColor: e.target.value })}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -1720,7 +1772,7 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
                         onChange={(value) => handleCardChange(cardIndex, "titleCaption", value)}
                       />
                     </div>
-
+                    {/* SIMPLE PRICE INPUT */}
                     <div className="mt-4">
                       <InputField
                         label="Price"
@@ -1730,6 +1782,28 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
                       />
                     </div>
 
+                    {/* ADD THIS - Price Color Picker */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Price Color
+                      </label>
+                      <div className="flex gap-3 items-center">
+                        <input
+                          type="color"
+                          value={card.priceColor || "#1F2937"}
+                          onChange={(e) => handleCardChange(cardIndex, "priceColor", e.target.value)}
+                          className="w-16 h-12 rounded cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={card.priceColor || "#1F2937"}
+                          onChange={(e) => handleCardChange(cardIndex, "priceColor", e.target.value)}
+                          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* SIMPLE PERIOD INPUT */}
                     <div className="mt-4">
                       <InputField
                         label="Period / Unit"
@@ -1738,7 +1812,6 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
                         onChange={(value) => handleCardChange(cardIndex, "period", value)}
                       />
                     </div>
-
                     <div className="mt-4">
                       <InputField
                         label="Price Caption"
@@ -1764,7 +1837,6 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
                           />
                         </button>
                       </div>
-
                       {card.oldPriceEnabled && (
                         <div className="space-y-3">
                           <InputField
@@ -1773,14 +1845,63 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
                             placeholder="$149 or 149 USD"
                             onChange={(value) => handleCardChange(cardIndex, "oldPrice", value)}
                           />
+
                           <InputField
                             label="Discount Label (optional)"
                             value={card.discountLabel || ""}
                             placeholder="Save 30% or -50%"
                             onChange={(value) => handleCardChange(cardIndex, "discountLabel", value)}
                           />
+
+                          {/* ADD THIS - Discount Label Color Picker */}
+                          {/* Discount Label Background Color */}
+                          {card.discountLabel && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Discount Label Background Color
+                              </label>
+                              <div className="flex gap-3 items-center">
+                                <input
+                                  type="color"
+                                  value={card.discountLabelColor || "#EF4444"}
+                                  onChange={(e) => handleCardChange(cardIndex, "discountLabelColor", e.target.value)}
+                                  className="w-16 h-12 rounded cursor-pointer"
+                                />
+                                <input
+                                  type="text"
+                                  value={card.discountLabelColor || "#EF4444"}
+                                  onChange={(e) => handleCardChange(cardIndex, "discountLabelColor", e.target.value)}
+                                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Discount Label Text Color */}
+                          {card.discountLabel && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Discount Label Text Color
+                              </label>
+                              <div className="flex gap-3 items-center">
+                                <input
+                                  type="color"
+                                  value={card.discountLabelTextColor || "#FFFFFF"}
+                                  onChange={(e) => handleCardChange(cardIndex, "discountLabelTextColor", e.target.value)}
+                                  className="w-16 h-12 rounded cursor-pointer"
+                                />
+                                <input
+                                  type="text"
+                                  value={card.discountLabelTextColor || "#FFFFFF"}
+                                  onChange={(e) => handleCardChange(cardIndex, "discountLabelTextColor", e.target.value)}
+                                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
+
                     </div>
 
                     <div className="mt-4">
@@ -2218,6 +2339,28 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
                         onChange={(value) => handleCardChange(cardIndex, "price", value)}
                       />
                     </div>
+
+                    {/* ADD THIS - Price Color Picker */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Price Color
+                      </label>
+                      <div className="flex gap-3 items-center">
+                        <input
+                          type="color"
+                          value={card.priceColor || "#1F2937"}
+                          onChange={(e) => handleCardChange(cardIndex, "priceColor", e.target.value)}
+                          className="w-16 h-12 rounded cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          value={card.priceColor || "#1F2937"}
+                          onChange={(e) => handleCardChange(cardIndex, "priceColor", e.target.value)}
+                          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
                     <div className="mt-4">
                       <InputField
                         label="Period / Unit"
@@ -2264,6 +2407,53 @@ const PricingCardEditor = ({ data, onChange }: PricingCardEditorProps) => {
                             placeholder="Save 30% or -50%"
                             onChange={(value) => handleCardChange(cardIndex, "discountLabel", value)}
                           />
+
+                          {/* ADD THIS - Discount Label Color Picker */}
+                         {/* Discount Label Background Color */}
+                          {card.discountLabel && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Discount Label Background Color
+                              </label>
+                              <div className="flex gap-3 items-center">
+                                <input
+                                  type="color"
+                                  value={card.discountLabelColor || "#EF4444"}
+                                  onChange={(e) => handleCardChange(cardIndex, "discountLabelColor", e.target.value)}
+                                  className="w-16 h-12 rounded cursor-pointer"
+                                />
+                                <input
+                                  type="text"
+                                  value={card.discountLabelColor || "#EF4444"}
+                                  onChange={(e) => handleCardChange(cardIndex, "discountLabelColor", e.target.value)}
+                                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Discount Label Text Color */}
+                          {card.discountLabel && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Discount Label Text Color
+                              </label>
+                              <div className="flex gap-3 items-center">
+                                <input
+                                  type="color"
+                                  value={card.discountLabelTextColor || "#FFFFFF"}
+                                  onChange={(e) => handleCardChange(cardIndex, "discountLabelTextColor", e.target.value)}
+                                  className="w-16 h-12 rounded cursor-pointer"
+                                />
+                                <input
+                                  type="text"
+                                  value={card.discountLabelTextColor || "#FFFFFF"}
+                                  onChange={(e) => handleCardChange(cardIndex, "discountLabelTextColor", e.target.value)}
+                                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -2521,11 +2711,10 @@ const PricingCardPreview = ({
   const preset = STYLE_PRESETS.find(p => p.id === appearance.columnStyle);
 
   // Use preset colors if a style is selected, otherwise use custom colors
-  const bgColor = isCustom ? appearance.secondaryColor : (preset?.primary || appearance.secondaryColor);
-  const textColor = isCustom ? appearance.primaryColor : (preset?.secondary || appearance.primaryColor);
+  const Primary_Color = isCustom ? appearance.secondaryColor : (preset?.primary || appearance.secondaryColor);
+  const Secondary_Color = isCustom ? appearance.primaryColor : (preset?.secondary || appearance.primaryColor);
 
-  const buttonRadius = appearance.buttonShape === "pill" ? "9999px" :
-    appearance.buttonShape === "sharp" ? "0px" : "12px";
+const buttonRadius = appearance.buttonRadius + "px";
 
   return (
     <div>
@@ -2552,6 +2741,7 @@ const PricingCardPreview = ({
       )}
 
       {/* ADD THIS WIDGET TITLE SECTION */}
+      {/* WIDGET TITLE SECTION */}
       {data.showWidgetTitle && (data.widgetTitle || data.widgetTitleCaption) && (
         <div className="text-center mb-8">
           {data.widgetTitle && (
@@ -2559,7 +2749,7 @@ const PricingCardPreview = ({
               className="font-bold mb-2"
               style={{
                 fontSize: `${appearance.fontSize * 2}px`,
-                color: appearance.primaryColor
+                color: data.widgetTitleColor || "#FF6B6B"
               }}
             >
               {data.widgetTitle}
@@ -2570,7 +2760,7 @@ const PricingCardPreview = ({
               className="opacity-70"
               style={{
                 fontSize: `${appearance.fontSize}px`,
-                color: appearance.primaryColor
+                color: data.widgetCaptionColor || "#6B7280"
               }}
             >
               {data.widgetTitleCaption}
@@ -2579,15 +2769,15 @@ const PricingCardPreview = ({
         </div>
       )}
 
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
         {currentCards.map((card, index) => (
           <div
             key={index}
-            className="rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-500"
+            className="rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-500 bg-white"
             style={{
-              backgroundColor: bgColor,
-              color: textColor,
+              // Only Peach Full BG gets full background, others use Primary_Color
+              backgroundColor: appearance.columnStyle === "style2" ? "white" : Primary_Color,
+              color: Secondary_Color,
               fontSize: `${appearance.fontSize}px`,
               lineHeight: "1.5",
             }}
@@ -2610,12 +2800,36 @@ const PricingCardPreview = ({
             )}
 
             {/* STYLE 2 & 3: Full Colored Background */}
-            {(appearance.columnStyle === "style2" || appearance.columnStyle === "style3") && (
-              <div className="p-8 text-center">
-                <h3 style={{ fontSize: `${appearance.fontSize * 1.875}px` }} className={`font-bold mb-2 ${appearance.columnStyle === "style3" ? "text-white" : "text-gray-800"}`}>
+            {/* STYLE 2: Peach Full BG */}
+            {appearance.columnStyle === "style2" && (
+              <div
+                className="p-8 text-center"
+                style={{
+                  backgroundColor: Primary_Color,
+                }}
+              >
+                <h3
+                  style={{ fontSize: `${appearance.fontSize * 1.875}px` }}
+                  className="font-bold mb-2 text-gray-800"
+                >
                   {card.title}
                 </h3>
-                <p style={{ fontSize: `${appearance.fontSize * 1.125}px` }} className={`mb-6 ${appearance.columnStyle === "style3" ? "text-gray-200" : "text-gray-600"}`}>
+                <p
+                  style={{ fontSize: `${appearance.fontSize * 1.125}px` }}
+                  className="mb-0 text-gray-600"
+                >
+                  {card.description}
+                </p>
+              </div>
+            )}
+
+            {/* STYLE 3: Dark Green */}
+            {appearance.columnStyle === "style3" && (
+              <div className="p-8 text-center">
+                <h3 style={{ fontSize: `${appearance.fontSize * 1.875}px` }} className="font-bold mb-2 text-white">
+                  {card.title}
+                </h3>
+                <p style={{ fontSize: `${appearance.fontSize * 1.125}px` }} className="mb-6 text-gray-200">
                   {card.description}
                 </p>
               </div>
@@ -2637,13 +2851,14 @@ const PricingCardPreview = ({
             {/* PRICE SECTION - Simple display */}
             <div className="px-8 text-center py-2 relative">
               {/* Discount Badge */}
+              {/* Discount Badge */}
               {card.oldPriceEnabled && card.discountLabel && (
                 <div className="absolute top-0 right-8">
                   <span
                     className="inline-block px-3 py-1 rounded-full text-xs font-bold"
                     style={{
-                      backgroundColor: '#EF4444',
-                      color: 'white',
+                      backgroundColor: card.discountLabelColor || '#EF4444',
+                      color: card.discountLabelTextColor || '#FFFFFF',
                       fontSize: `${appearance.fontSize * 0.75}px`
                     }}
                   >
@@ -2666,10 +2881,24 @@ const PricingCardPreview = ({
 
               {/* Current Price - Just display what user typed */}
               <div>
-                <span style={{ fontSize: `${appearance.fontSize * 3.125}px` }} className="font-bold">
+                <span
+                  style={{
+                    fontSize: `${appearance.fontSize * 3.125}px`,
+                    color: card.priceColor || (appearance.columnStyle === "style2" ? "#1F2937" : "inherit")
+                  }}
+                  className="font-bold"
+                >
                   {card.price}
                 </span>
-                <span style={{ fontSize: `${appearance.fontSize * 1.125}px` }} className="opacity-80"> {card.period}</span>
+                <span
+                  style={{
+                    fontSize: `${appearance.fontSize * 1.125}px`,
+                    color: card.priceColor || (appearance.columnStyle === "style2" ? "#4B5563" : "inherit")
+                  }}
+                  className="opacity-80"
+                >
+                  {card.period}
+                </span>
               </div>
 
               {/* Price Caption */}
@@ -2678,7 +2907,15 @@ const PricingCardPreview = ({
               )}
 
               {/* DESCRIPTION - MOVED HERE */}
-              <p style={{ fontSize: `${appearance.fontSize * 0.875}px` }} className="opacity-80 mt-3">{card.description}</p>
+              <p
+                style={{
+                  fontSize: `${appearance.fontSize * 0.875}px`,
+                  color: appearance.columnStyle === "style2" ? "#6B7280" : "inherit"
+                }}
+                className="opacity-80 mt-3"
+              >
+                {card.description}
+              </p>
             </div>
 
             {/* Features */}
@@ -2689,7 +2926,7 @@ const PricingCardPreview = ({
                     <svg
                       style={{ width: `${appearance.fontSize * 1.5}px`, height: `${appearance.fontSize * 1.5}px` }}
                       className="mr-3 mt-0.5 flex-shrink-0"
-                      fill={isCustom ? textColor : "white"}
+                      fill={appearance.columnStyle === "style2" ? "#10B981" : (isCustom ? Primary_Color : "white")}
                       viewBox="0 0 20 20"
                     >
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
@@ -2730,19 +2967,19 @@ const PricingCardPreview = ({
                   style={{
                     background:
                       appearance.buttonType === "filled"
-                        ? (isCustom ? appearance.primaryColor : textColor)
+                        ? (isCustom ? appearance.primaryColor : Primary_Color)
                         : appearance.buttonType === "gradient"
                           ? (isCustom
                             ? `linear-gradient(to right, ${appearance.primaryColor}, ${appearance.secondaryColor})`
-                            : `linear-gradient(to right, ${textColor}, ${textColor}dd)`)
+                            : `linear-gradient(to right, ${Primary_Color}, ${Primary_Color}dd)`)
                           : "transparent",
                     border:
                       appearance.buttonType === "outline"
-                        ? `2px solid ${isCustom ? appearance.primaryColor : textColor}`
+                        ? `2px solid ${isCustom ? appearance.primaryColor : Primary_Color}`
                         : "none",
                     color:
                       appearance.buttonType === "outline"
-                        ? (isCustom ? appearance.primaryColor : textColor)
+                        ? (isCustom ? appearance.primaryColor : Primary_Color)
                         : "white",
                     borderRadius: buttonRadius,
                     fontSize: `${appearance.fontSize * 1.125}px`,
@@ -2756,19 +2993,19 @@ const PricingCardPreview = ({
                   style={{
                     background:
                       appearance.buttonType === "filled"
-                        ? (isCustom ? appearance.primaryColor : textColor)
+                        ? (isCustom ? appearance.primaryColor : Primary_Color)
                         : appearance.buttonType === "gradient"
                           ? (isCustom
                             ? `linear-gradient(to right, ${appearance.primaryColor}, ${appearance.secondaryColor})`
-                            : `linear-gradient(to right, ${textColor}, ${textColor}dd)`)
+                            : `linear-gradient(to right, ${Primary_Color}, ${Primary_Color}dd)`)
                           : "transparent",
                     border:
                       appearance.buttonType === "outline"
-                        ? `2px solid ${isCustom ? appearance.primaryColor : textColor}`
+                        ? `2px solid ${isCustom ? appearance.primaryColor : Primary_Color}`
                         : "none",
                     color:
                       appearance.buttonType === "outline"
-                        ? (isCustom ? appearance.primaryColor : textColor)
+                        ? (isCustom ? appearance.primaryColor : Primary_Color)
                         : "white",
                     borderRadius: buttonRadius,
                     fontSize: `${appearance.fontSize * 1.125}px`,
@@ -2820,17 +3057,17 @@ const EditorPage = ({ editorType }: { editorType: EditorType }) => {
   const [editorData, setEditorData] = useState<EditorData>(getInitialData());
   const [activeTab, setActiveTab] = useState<"content" | "appearance">("content");
 
-  const [appearance, setAppearance] = useState<AppearanceSettings>({
+ const [appearance, setAppearance] = useState<AppearanceSettings>({
     primaryColor: "#1F2937",
     secondaryColor: "#F3F4F6",
     font: "Inter",
     fontWeight: "400",
     fontSize: 16,
     buttonShape: "rounded",
+    buttonRadius: 12, // ADD THIS LINE
     buttonType: "filled",
     columnStyle: "custom",
   });
-
 
 
 
@@ -3005,19 +3242,30 @@ const EditorPage = ({ editorType }: { editorType: EditorType }) => {
 
                   {/* Button Style */}
                   {/* Button Shape */}
+               {/* Button Shape */}
+                  {/* Button Border Radius */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Button Shape</label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {["rounded", "pill", "sharp"].map((shape) => (
-                        <button
-                          key={shape}
-                          onClick={() => setAppearance({ ...appearance, buttonShape: shape as any })}
-                          className={`py-3 px-6 font-medium transition-all ${appearance.buttonShape === shape ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300"
-                            } ${shape === "pill" ? "rounded-full" : shape === "sharp" ? "rounded-none" : "rounded-lg"}`}
-                        >
-                          {shape.charAt(0).toUpperCase() + shape.slice(1)}
-                        </button>
-                      ))}
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Button Border Radius: {appearance.buttonRadius}px
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={appearance.buttonRadius}
+                      onChange={(e) => {
+                        const radius = Number(e.target.value);
+                        setAppearance({ ...appearance, buttonRadius: radius });
+                      }}
+                      className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                    />
+                    <div className="flex justify-between text-xs text-gray-400 mt-2">
+                      <span>0px</span>
+                      <span>25px</span>
+                      <span>50px</span>
+                      <span>75px</span>
+                      <span>100px</span>
                     </div>
                   </div>
 
