@@ -1068,7 +1068,7 @@ const ComparisonTableEditor = ({
             Categories & Features
           </label>
           {editingCategoryIndex === null ? (
-            // COLLAPSED VIEW - Show all categories as clickable bars
+            
             <>
               {data.categories.map((category, catIndex) => (
                 <div
